@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_years_tree" model="ir.ui.view">
+        <field name="name">years.tree</field>
+        <field name="model">years</field>
+        <field name="arch" type="xml">
+            <tree string="Danh sách Năm học" decoration-info="active == True">
+                <field name="ma_nam_hoc"/>
+                <field name="ten_nam_hoc"/>
+                <field name="nam_bat_dau"/>
+                <field name="nam_ket_thuc"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="business_unit_id"/>
+                <field name="active" widget="boolean_toggle"/>
+
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_years_form" model="ir.ui.view">
+        <field name="name">years.form</field>
+        <field name="model">years</field>
+        <field name="arch" type="xml">
+            <form string="Thông tin Năm học">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="ten_nam_hoc" string="Tên năm học"/>
+                        <h1>
+                            <field name="ten_nam_hoc" placeholder="Ví dụ: Năm học 2026 - 2027"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Thông tin định danh">
+                            <field name="ma_nam_hoc"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Thời gian &amp; Đơn vị">
+                            <field name="nam_bat_dau"/>
+                            <field name="nam_ket_thuc"/>
+                            <field name="company_id" options="{'no_create': True}"/>
+                            <field name="business_unit_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_years_search" model="ir.ui.view">
+        <field name="name">years.search</field>
+        <field name="model">years</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm Năm học">
+                <field name="ma_nam_hoc"/>
+                <field name="ten_nam_hoc"/>
+                <filter string="Đang hoạt động" name="active" domain="[('active', '=', True)]"/>
+                <group expand="0" string="Góm nhóm theo">
+                    <filter string="Năm bắt đầu" name="group_start" context="{'group_by': 'nam_bat_dau'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_years" model="ir.actions.act_window">
+        <field name="name">Năm học</field>
+        <field name="res_model">years</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_years_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có dữ liệu năm học.
+            </p>
+            <p>
+                Dữ liệu có thể được tạo thủ công hoặc đồng bộ qua API từ hệ thống khác.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_nam_hoc"
+              name="Năm học"
+              parent="ev_tnu_hp_master_data.menu_khoa_hoc_lop_hoc_root"
+              action="action_years"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="action_hp_product_template" model="ir.actions.act_window">
+            <field name="name">Danh mục Khoản thu</field>
+            <field name="res_model">product.template</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('type', '=', 'service')]</field>
+            <field name="context">{'default_type': 'service', 'default_detailed_type': 'service'}</field>
+        </record>
+
+        <menuitem id="menu_hp_product"
+                  name="Khoản thu"
+                  parent="ev_tnu_hp_master_data.menu_khac_root"
+                  action="action_hp_product_template"
+                  sequence="40"/>
+</odoo>

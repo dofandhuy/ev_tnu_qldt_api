@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="semester_search_view" model="ir.ui.view">
+        <field name="name">semester.search</field>
+        <field name="model">semester</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm Kỳ học">
+                <field name="ma_ky_hoc"/>
+                <field name="ten_ky_hoc"/>
+                <field name="nam_hoc_id"/>
+                <separator/>
+                <filter string="Kỳ chính" name="ky_chinh" domain="[('phan_loai', '=', 'ky_chinh')]"/>
+                <filter string="Kỳ phụ" name="ky_phu" domain="[('phan_loai', '=', 'ky_phu')]"/>
+                <group expand="0" string="Gom nhóm theo">
+                    <filter string="Năm học" name="group_by_nam_hoc" context="{'group_by': 'nam_hoc_id'}"/>
+                    <filter string="Phân loại" name="group_by_phan_loai" context="{'group_by': 'phan_loai'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="view_semester_tree" model="ir.ui.view">
+        <field name="name">semester.tree</field>
+        <field name="model">semester</field>
+        <field name="arch" type="xml">
+            <tree string="Danh sách Kỳ học" decoration-info="phan_loai == 'ky_chinh'"
+                  decoration-warning="phan_loai == 'ky_phu'">
+                <field name="ma_ky_hoc"/>
+                <field name="ten_ky_hoc"/>
+                <field name="nam_hoc_id"/>
+                <field name="phan_loai"/>
+                <field name="business_unit_id" groups="base.group_multi_company"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_semester_form" model="ir.ui.view">
+        <field name="name">semester.form</field>
+        <field name="model">semester</field>
+        <field name="arch" type="xml">
+            <form string="Thông tin Kỳ học">
+                <sheet>
+
+                    <div class="oe_title">
+                        <label for="ten_ky_hoc" string="Tên kỳ học"/>
+                        <h1>
+                            <field name="ten_ky_hoc" placeholder="Ví dụ: Học kỳ 1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ma_ky_hoc"/>
+                            <field name="nam_hoc_id" options="{'no_create': True, 'no_open': False}"/>
+                            <field name="ten_nam_hoc"/>
+                        </group>
+                        <group>
+                            <field name="phan_loai" widget="radio" options="{'horizontal': true}"/>
+                            <field name="business_unit_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_semester" model="ir.actions.act_window">
+        <field name="name">Kỳ học</field>
+        <field name="res_model">semester</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="semester_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Chưa có dữ liệu kỳ học.
+            </p>
+            <p>
+                Dữ liệu sẽ được đồng bộ từ API hoặc tạo thủ công tại đây.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ky_hoc"
+              name="Kỳ học"
+              parent="ev_tnu_hp_master_data.menu_khoa_hoc_lop_hoc_root"
+              action="action_semester"
+              sequence="20"/>
+</odoo>

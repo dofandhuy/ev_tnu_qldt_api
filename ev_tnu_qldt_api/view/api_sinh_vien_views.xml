@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_partner_student_tree" model="ir.ui.view">
+            <field name="name">res.partner.student.tree</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <tree string="Sinh viên">
+                    <field name="ma_sinh_vien"/>
+                    <field name="name"/>
+                    <field name="ngay_sinh"/>
+                    <field name="gioi_tinh"/>
+                    <field name="lop_hanh_chinh_id"/>
+                    <field name="phone"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_partner_student_form" model="ir.ui.view">
+            <field name="name">res.partner.student.form</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" string="Họ và tên"/>
+                            <h1>
+                                <field name="name" required="1"/>
+                            </h1>
+                            <label for="ma_sinh_vien" string="Mã SV"/>
+                            <field name="ma_sinh_vien" required="1"/>
+                        </div>
+                        <group>
+                            <group string="Thông tin cá nhân">
+                                <field name="ngay_sinh"/>
+                                <field name="gioi_tinh"/>
+                                <field name="cccd"/>
+                                <field name="email"/>
+                                <field name="phone"/>
+                            </group>
+                            <group string="Thông tin học vụ">
+                                <field name="lop_hanh_chinh_id"/>
+                                <field name="nganh_hoc_id"/>
+                                <field name="nien_khoa_id"/>
+                                <field name="la_sinh_vien" invisible="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_student_info" model="ir.actions.act_window">
+            <field name="name">Hồ sơ Sinh viên</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('la_sinh_vien', '=', True)]</field>
+            <field name="context">{'default_la_sinh_vien': True}</field>
+        </record>
+
+        <menuitem id="menu_student_root" name="Sinh viên" parent="ev_tnu_hp_master_data.menu_doi_tuong_root" action="action_student_info"
+                  sequence="30"/>
+</odoo>

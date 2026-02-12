@@ -1,0 +1,42 @@
+<odoo>
+    <data noupdate="1">
+        <record id="connection_qldt" model="config.connection">
+            <field name="name">qldt</field>
+            <field name="database">Bai1</field>
+            <field name="port">8069</field>
+            <field name="user">admin</field>
+            <field name="password">admin</field>
+        </record>
+
+        <record id="api_years_config" model="config.api">
+            <field name="connection_id" ref="connection_qldt"/>
+            <field name="name">Đồng bộ Năm học</field>
+            <field name="code">/api/v1/qldt/years</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+        <record id="api_login_config" model="config.api">
+            <field name="connection_id" ref="connection_qldt"/>
+            <field name="name">Đăng nhập QLDT</field>
+            <field name="code">/api/v1/qldt/login</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+        <record id="api_semester_config" model="config.api">
+            <field name="connection_id" ref="connection_qldt"/>
+            <field name="name">Đồng bộ Kỳ học</field>
+            <field name="code">/api/v1/qldt/semester</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+          <record id="api_student_config" model="config.api">
+            <field name="connection_id" ref="connection_qldt"/>
+            <field name="name">Đồng bộ học sinh</field>
+            <field name="code">/api/v1/qldt/student</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+           <record id="api_purchase_config" model="config.api">
+            <field name="connection_id" ref="connection_qldt"/>
+            <field name="name">Đồng bộ khoản thu</field>
+            <field name="code">/api/v1/qldt/purchase</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+    </data>
+</odoo>
