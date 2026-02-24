@@ -50,10 +50,16 @@ class LogSyncReceiveNamHoc(models.Model):
 
                 # 1. Ép kiểu an toàn cho ma_don_vi
 
-                ma_don_vi = str(data.get('ma_don_vi') or '').strip()
+                ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
 
-                if not ma_don_vi:
-                    _logger.error("LỖI: ma_don_vi là bắt buộc nhưng đang trống!")
+                # Tìm bản ghi đơn vị kinh doanh trong hệ thống
+                # Giả sử model đơn vị là 'res.business.unit' và trường mã là 'code'
+                business_unit = self.env['res.business.unit'].sudo().search([
+                    ('code', '=', ma_dv_raw)
+                ], limit=1)
+
+                if not business_unit:
+                    _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
 
                     return '096'
 
@@ -71,9 +77,11 @@ class LogSyncReceiveNamHoc(models.Model):
 
                     'nam_ket_thuc': str(data.get('nam_ket_thuc') or 0).strip(),
 
-                    'ma_don_vi': ma_don_vi,
+                    'ma_don_vi': ma_dv_raw,
 
                 }
+                if business_unit:
+                    vals['business_unit_id'] = business_unit.id
 
                 if not year:
 
@@ -84,7 +92,7 @@ class LogSyncReceiveNamHoc(models.Model):
                     year.write(vals)
 
             self.write({'state': 'done', 'date_done': datetime.now()})
-            return '000'  # Trả về thành công
+            return '000'
 
 
         except Exception as e:

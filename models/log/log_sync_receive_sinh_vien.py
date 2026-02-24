@@ -51,6 +51,19 @@ class LogSyncReceiveStudent(models.Model):
             def get_id(model, code):
                 return self.env[model].sudo().search([('code', '=', code)], limit=1).id if code else False
 
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+
+            # Tìm bản ghi đơn vị kinh doanh trong hệ thống
+            # Giả sử model đơn vị là 'res.business.unit' và trường mã là 'code'
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
+
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+
+                return '096'
+
             vals = {
                 'ma_sinh_vien': ma_sv,
                 'name': data.get('name'),
@@ -58,6 +71,7 @@ class LogSyncReceiveStudent(models.Model):
                 'gioi_tinh': data.get('gioi_tinh'),
                 'la_sinh_vien': True,
                 'ma_don_vi': str(data.get('ma_don_vi') or '').strip(),
+                'business_unit_id': business_unit.id,
             }
 
             if not student:

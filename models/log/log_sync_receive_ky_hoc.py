@@ -66,13 +66,27 @@ class LogSyncReceiveKyHoc(models.Model):
             if any(x in str(raw_phan_loai).lower() for x in ['phụ', 'phu', '2']):
                 val_phan_loai = 'ky_phu'
 
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+
+            # Tìm bản ghi đơn vị kinh doanh trong hệ thống
+            # Giả sử model đơn vị là 'res.business.unit' và trường mã là 'code'
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
+
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+
+                return '096'
+
             # 4. Chuẩn bị dữ liệu Update/Create
             vals = {
                 'ma_ky_hoc': ma_ky_hoc,
                 'ten_ky_hoc': data.get('ten_ky_hoc') or ma_ky_hoc,
                 'nam_hoc_id': year_rec.id,
-                'ma_don_vi': str(data.get('ma_don_vi')or '').strip(),
+                'ma_don_vi': ma_dv_raw,
                 'phan_loai': val_phan_loai,
+                'business_unit_id': business_unit.id,
             }
 
             if not semester:
