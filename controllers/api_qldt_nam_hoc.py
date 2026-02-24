@@ -35,13 +35,19 @@ class QLDTNamHoc(Controller):
             if result:
                 raise ApiException(message=message, code=code)
 
-
-
-
-
             data = params.get('data', {})
             action = params.get('action')
             ma_nam_hoc = data.get('ma_nam_hoc')
+
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+
+                return '096'
+
 
             code = "000"
             message = "Thành công"
@@ -59,7 +65,8 @@ class QLDTNamHoc(Controller):
             # Kiểm tra tồn tại đối với hành động sửa/xóa (sử dụng model hp.nam.hoc)
             if code == '000' and action in ['update', 'delete']:
                 year_id = request.env['hp.nam.hoc'].sudo().search([
-                    ('ma_nam_hoc', '=', ma_nam_hoc)
+                    ('ma_nam_hoc', '=', ma_nam_hoc),
+                    ('business_unit_id', '=', business_unit.id),
                 ], limit=1)
                 if not year_id:
                     code = '147'

@@ -39,8 +39,17 @@ class QLDTKyhoc(Controller):
             success_code = "000"
             success_msg = "Thành công"
 
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+
+                return '096'
+
             if action in ['update', 'delete'] and code=='000':
-                sem_exists = request.env['hp.ky.hoc'].sudo().search([('ma_ky_hoc', '=', ma_ky_hoc)])
+                sem_exists = request.env['hp.ky.hoc'].sudo().search([('ma_ky_hoc', '=', ma_ky_hoc), ('business_unit_id','=',business_unit.id)])
                 if not sem_exists:
                     success_code, success_msg = "147", "Kỳ học không tồn tại"
 

@@ -36,13 +36,24 @@ class LogSyncReceiveKyHoc(models.Model):
             data = inner_params.get('data') or raw_data.get('data') or {}
             action = raw_data.get('action') or inner_params.get('action')
 
-            ma_ky_hoc = data.get('ma_ky_hoc')
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+
+                return '096'
+
+            ma_ky_hoc = str(data.get('ma_ky_hoc') or '').strip()
             if not ma_ky_hoc:
                 _logger.error("Dữ liệu thiếu ma_ky_hoc")
                 return '096'
 
             SemObj = self.env['hp.ky.hoc'].sudo()
-            semester = SemObj.search([('ma_ky_hoc', '=', ma_ky_hoc)], limit=1)
+            semester = SemObj.search([('ma_ky_hoc', '=', ma_ky_hoc),
+                                      ('business_unit_id', '=','bussiness_unit.id')],
+                                      limit=1)
 
             # 1. Xử lý xóa
             if action == 'delete':
@@ -51,10 +62,11 @@ class LogSyncReceiveKyHoc(models.Model):
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 
-            # 2. Tìm ID Năm học (Tránh lỗi .id trên recordset rỗng)
             search_year_code = data.get('nam_hoc_id') or data.get('ma_nam_hoc')
 
-            year_rec = self.env['hp.nam.hoc'].sudo().search([('ma_nam_hoc', '=', search_year_code)], limit=1)
+            year_rec = self.env['hp.nam.hoc'].sudo().search([('ma_nam_hoc', '=', search_year_code),
+                                                             ('business_unit_id','=','business_unit.id')],
+                                                             limit=1)
 
             if not year_rec:
                 _logger.error("Không tìm thấy Năm học với mã: %s", search_year_code)
@@ -63,23 +75,9 @@ class LogSyncReceiveKyHoc(models.Model):
             # 3. Chuẩn hóa Phân loại
             raw_phan_loai = data.get('phan_loai', '')
             val_phan_loai = 'ky_chinh'
-            if any(x in str(raw_phan_loai).lower() for x in ['phụ', 'phu', '2']):
+            if any(x in str(raw_phan_loai).lower() for x in ['phu']):
                 val_phan_loai = 'ky_phu'
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
-
-            # Tìm bản ghi đơn vị kinh doanh trong hệ thống
-            # Giả sử model đơn vị là 'res.business.unit' và trường mã là 'code'
-            business_unit = self.env['res.business.unit'].sudo().search([
-                ('code', '=', ma_dv_raw)
-            ], limit=1)
-
-            if not business_unit:
-                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
-
-                return '096'
-
-            # 4. Chuẩn bị dữ liệu Update/Create
             vals = {
                 'ma_ky_hoc': ma_ky_hoc,
                 'ten_ky_hoc': data.get('ten_ky_hoc') or ma_ky_hoc,

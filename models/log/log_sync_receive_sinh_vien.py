@@ -34,12 +34,21 @@ class LogSyncReceiveStudent(models.Model):
             params = raw_data.get('params', raw_data)
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
+
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+                return '096'
+
             ma_sv = data.get('ma_sinh_vien')
-
             if not ma_sv: return '096'
-
             PartnerObj = self.env['res.partner'].sudo()
-            student = PartnerObj.search([('ma_sinh_vien', '=', ma_sv)], limit=1)
+            student = PartnerObj.search([('ma_sinh_vien', '=', ma_sv),
+                                         ('business_unit_id','=',business_unit.id)],
+                                        limit=1)
 
             if action == 'delete':
                 if student:
@@ -51,18 +60,7 @@ class LogSyncReceiveStudent(models.Model):
             def get_id(model, code):
                 return self.env[model].sudo().search([('code', '=', code)], limit=1).id if code else False
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
 
-            # Tìm bản ghi đơn vị kinh doanh trong hệ thống
-            # Giả sử model đơn vị là 'res.business.unit' và trường mã là 'code'
-            business_unit = self.env['res.business.unit'].sudo().search([
-                ('code', '=', ma_dv_raw)
-            ], limit=1)
-
-            if not business_unit:
-                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
-
-                return '096'
 
             vals = {
                 'ma_sinh_vien': ma_sv,

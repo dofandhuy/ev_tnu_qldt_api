@@ -4,7 +4,9 @@ import logging
 from odoo import models, fields, api
 from datetime import datetime
 from odoo.exceptions import ValidationError
+
 _logger = logging.getLogger(__name__)
+
 
 class LogSyncReceiveKhoanThu(models.Model):
     _name = 'log.sync.receive.revenue'
@@ -35,18 +37,34 @@ class LogSyncReceiveKhoanThu(models.Model):
             params = raw_data.get('params', raw_data)
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
+
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            if not ma_dv_raw:
+                _logger.error("Dữ liệu thiếu ma_don_vi để xác định Company")
+                return '096'
+
+            # Tra cứu Business Unit dựa trên code gửi về
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
+
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+                return '096'
+
+            target_company_id = business_unit.company_id.id
+            if not target_company_id:
+                _logger.error("Business Unit %s chưa được gán Company", ma_dv_raw)
+                return '096'
+
             sku = data.get('default_code')
 
             if not sku: return '096'
 
-            # Sử dụng product.template vì đây là model gốc của Khoản thu
             ProdObj = self.env['product.template'].sudo()
-            product = ProdObj.search([('default_code', '=', sku)], limit=1)
-
-            company_id = data.get('company_id')
-            if not company_id or int(company_id) == 0:
-                company_id = self.env.user.company_id.id or 1  # Ép về ID 1 nếu ko tìm thấy
-
+            product = ProdObj.search([('default_code', '=', sku),
+                                      ('company_id','=','target_company_id')],
+                                     limit=1)
 
             if action == 'delete':
                 if product:
@@ -54,12 +72,12 @@ class LogSyncReceiveKhoanThu(models.Model):
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 
+
+
             vals = {
                 'default_code': sku,
                 'name': data.get('name'),
-                'type': data.get('type', 'service'),
-                'detailed_type': data.get('detailed_type', 'service'),
-                'company_id': company_id,
+                'company_id': target_company_id,
                 'sale_ok': True,
                 'purchase_ok': False,
             }

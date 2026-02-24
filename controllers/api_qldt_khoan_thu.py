@@ -19,7 +19,7 @@ class QLDTKhoanThu(Controller):
     @route(route=api_url, methods=['POST'], auth='public', type='json')
     def purchase(self, **post):
         try:
-            verify = ["default_code","name","type","detailed_type","company_id"]
+            verify = ["default_code","name","ma_don_vi"]
             params = request.httprequest.json
 
             result, code, message, remote_ip, api_name, api_id = utils.check_error(

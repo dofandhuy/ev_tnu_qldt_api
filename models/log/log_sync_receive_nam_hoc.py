@@ -36,10 +36,20 @@ class LogSyncReceiveNamHoc(models.Model):
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
 
-            year_code = str(data.get('ma_nam_hoc') or '').strip()
+            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            business_unit = self.env['res.business.unit'].sudo().search([
+                ('code', '=', ma_dv_raw)
+            ], limit=1)
 
+            if not business_unit:
+                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+                return '096'
+
+            year_code = str(data.get('ma_nam_hoc') or '').strip()
             YearObj = self.env['hp.nam.hoc'].sudo()
-            year = YearObj.search([('ma_nam_hoc', '=', year_code)], limit=1)
+            year = YearObj.search([('ma_nam_hoc', '=', year_code),
+                                   ('business_unit_id', '=', business_unit.id)],
+                                  limit=1)
 
             if action == 'delete':
                 if year:
@@ -47,25 +57,6 @@ class LogSyncReceiveNamHoc(models.Model):
 
 
             else:
-
-                # 1. Ép kiểu an toàn cho ma_don_vi
-
-                ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
-
-                # Tìm bản ghi đơn vị kinh doanh trong hệ thống
-                # Giả sử model đơn vị là 'res.business.unit' và trường mã là 'code'
-                business_unit = self.env['res.business.unit'].sudo().search([
-                    ('code', '=', ma_dv_raw)
-                ], limit=1)
-
-                if not business_unit:
-                    _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
-
-                    return '096'
-
-                # 2. Ép kiểu CHUỖI cho toàn bộ các trường Char của Odoo
-
-                # Điều này ngăn lỗi .strip() ở các hàm hệ thống/model gốc
 
                 vals = {
 
@@ -79,9 +70,9 @@ class LogSyncReceiveNamHoc(models.Model):
 
                     'ma_don_vi': ma_dv_raw,
 
+                    'business_unit_id': business_unit.id,
+
                 }
-                if business_unit:
-                    vals['business_unit_id'] = business_unit.id
 
                 if not year:
 
