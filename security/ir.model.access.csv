@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_log_sync_receive_years,log.sync.receive.years,model_log_sync_receive_years,base.group_user,1,1,1,1
+access_log_sync_receive_semester,log.sync.receive.semester,model_log_sync_receive_semester,base.group_user,1,1,1,1
+access_log_sync_receive_revenue,log.sync.receive.revenue,model_log_sync_receive_revenue,base.group_user,1,1,1,1
+access_log_sync_receive_student,log.sync.receive.student,model_log_sync_receive_student,base.group_user,1,1,1,1
