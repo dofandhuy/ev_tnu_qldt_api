@@ -10,8 +10,8 @@ class NamHoc(models.Model):
     ma_nam_hoc = fields.Char(string='Mã năm học', required=True)
     nam_bat_dau = fields.Integer(string='Năm bắt đầu', required=True)
     nam_ket_thuc = fields.Integer(string='Năm kết thúc', required=True)
-    active = fields.Boolean(string='Còn hoạt động', required=True   )
-    company_id = fields.Many2one('res.company', string='Công ty', required=True)
+    active = fields.Boolean(string='Còn hoạt động'   )
+    company_id = fields.Many2one('res.company', string='Công ty')
     business_unit_id = fields.Many2one('res.business.unit', string='Đơn vị kinh doanh', required=True)
 
     _sql_constraints = [

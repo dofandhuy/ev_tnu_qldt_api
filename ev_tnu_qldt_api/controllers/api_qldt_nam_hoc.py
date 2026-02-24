@@ -5,9 +5,9 @@ from odoo.http import route, Controller, request
 from odoo.addons.izi_lib.helpers.Route import Route
 from odoo.addons.izi_lib.helpers.ApiException import ApiException
 from odoo.addons.izi_lib.helpers.Response import Response
+from odoo.addons.ev_tnu_api_utils.controllers import utils
+from odoo.addons.ev_tnu_api_utils.controllers.code_response import RESPONSE_CODE_MSG
 from odoo.addons.ev_config_connect_api.helpers import Configs
-from . import utils
-
 logger = logging.getLogger(__name__)
 
 api_url = Route('years', version='1', app='qldt')
@@ -23,7 +23,7 @@ class QLDTNamHoc(Controller):
             # 1. Định nghĩa các trường bắt buộc
             verify = [
                 "ma_nam_hoc", "ten_nam_hoc", "nam_bat_dau",
-                "nam_ket_thuc", "active", "company_id", "business_unit_id"
+                "nam_ket_thuc", "business_unit_id"
             ]
             params = request.httprequest.json
 

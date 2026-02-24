@@ -14,12 +14,7 @@
             <field name="code">/api/v1/qldt/years</field>
             <field name="is_token_required" eval="False"/>
         </record>
-        <record id="api_login_config" model="config.api">
-            <field name="connection_id" ref="connection_qldt"/>
-            <field name="name">Đăng nhập QLDT</field>
-            <field name="code">/api/v1/qldt/login</field>
-            <field name="is_token_required" eval="False"/>
-        </record>
+
         <record id="api_semester_config" model="config.api">
             <field name="connection_id" ref="connection_qldt"/>
             <field name="name">Đồng bộ Kỳ học</field>

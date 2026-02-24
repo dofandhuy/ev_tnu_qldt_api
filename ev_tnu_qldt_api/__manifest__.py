@@ -21,7 +21,8 @@
     'data': [
         'security/ir.model.access.csv',
         'data/qldt_api_config_data.xml',
-         'view/api_nam_hoc_views.xml',
+        'data/api_qldt_login_data.xml',
+        'view/api_nam_hoc_views.xml',
         'view/api_ky_hoc_views.xml',
         'view/api_sinh_vien_views.xml',
         'view/api_khoan_thu_views.xml'

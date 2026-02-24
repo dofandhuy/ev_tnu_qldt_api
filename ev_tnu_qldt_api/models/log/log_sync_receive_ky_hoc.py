@@ -31,8 +31,7 @@ class LogSyncReceiveKyHoc(models.Model):
         self.ensure_one()
         try:
             raw_data = json.loads(self.params or "{}")
-            # Cấu trúc IZI thường bọc trong params, ta lấy data từ đúng chỗ
-            # Nếu gửi từ Postman { "params": { "data": { ... } } }
+
             inner_params = raw_data.get('params', {})
             data = inner_params.get('data') or raw_data.get('data') or {}
             action = raw_data.get('action') or inner_params.get('action')
@@ -53,13 +52,13 @@ class LogSyncReceiveKyHoc(models.Model):
                 return '000'
 
             # 2. Tìm ID Năm học (Tránh lỗi .id trên recordset rỗng)
-            year_rec = self.env['years'].sudo().search([('ma_nam_hoc', '=', data.get('ma_nam_hoc'))], limit=1)
-            if not year_rec:
-                _logger.error("Không tìm thấy Năm học với mã: %s", data.get('ma_nam_hoc'))
-                # Nếu model semester yêu cầu bắt buộc nam_hoc_id, ta phải dừng tại đây
-                return '096'
+            search_year_code = data.get('nam_hoc_id') or data.get('ma_nam_hoc')
 
-            year_id = year_rec.id
+            year_rec = self.env['years'].sudo().search([('ma_nam_hoc', '=', search_year_code)], limit=1)
+
+            if not year_rec:
+                _logger.error("Không tìm thấy Năm học với mã: %s", search_year_code)
+                return '096'
 
             # 3. Chuẩn hóa Phân loại
             raw_phan_loai = data.get('phan_loai', '')
@@ -71,9 +70,8 @@ class LogSyncReceiveKyHoc(models.Model):
             vals = {
                 'ma_ky_hoc': ma_ky_hoc,
                 'ten_ky_hoc': data.get('ten_ky_hoc') or ma_ky_hoc,
-                'nam_hoc_id': year_id,
+                'nam_hoc_id': year_rec.id,
                 'business_unit_id': int(data.get('business_unit_id') or 1),
-                'company_id': int(data.get('company_id') or self.env.company.id),
                 'phan_loai': val_phan_loai,
             }
 

@@ -50,11 +50,10 @@ class LogSyncReceiveNamHoc(models.Model):
 
             else:
                 # Ép kiểu và kiểm tra dữ liệu
-                c_id = int(data.get('company_id') or 0)
                 b_id = int(data.get('business_unit_id') or 0)
 
                 # Nếu là trường bắt buộc mà API gửi về bằng 0 hoặc không gửi
-                if not c_id or not b_id:
+                if  not b_id:
                     _logger.error("LỖI: company_id và business_unit_id là bắt buộc nhưng đang trống!")
                     return '096'
                 vals = {
@@ -62,8 +61,6 @@ class LogSyncReceiveNamHoc(models.Model):
                     'ten_nam_hoc': data.get('ten_nam_hoc'),
                     'nam_bat_dau': int(data.get('nam_bat_dau') or 0),
                     'nam_ket_thuc': int(data.get('nam_ket_thuc') or 0),
-                    'active': bool(data.get('active')),
-                    'company_id': c_id,
                     'business_unit_id': b_id,
                 }
                 if not year:

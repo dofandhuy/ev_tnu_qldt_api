@@ -5,7 +5,8 @@ from odoo.http import route, Controller, request
 from odoo.addons.izi_lib.helpers.Route import Route
 from odoo.addons.izi_lib.helpers.ApiException import ApiException
 from odoo.addons.izi_lib.helpers.Response import Response
-from . import utils
+from odoo.addons.ev_tnu_api_utils.controllers import utils
+from odoo.addons.ev_tnu_api_utils.controllers.code_response import RESPONSE_CODE_MSG
 from odoo.addons.ev_config_connect_api.helpers import Configs
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class QLDTKyhoc(Controller):
             verify = [
                       "ma_ky_hoc", "ten_ky_hoc",
                       "nam_hoc_id", "ten_nam_hoc", "business_unit_id",
-                      "company_id","phan_loai"
+                      "phan_loai"
             ]
             params = request.httprequest.json
 
