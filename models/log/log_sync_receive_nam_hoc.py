@@ -43,7 +43,7 @@ class LogSyncReceiveNamHoc(models.Model):
 
             if action == 'delete':
                 if year:
-                    year.unlink()
+                    year.write({'active': False})
 
 
             else:

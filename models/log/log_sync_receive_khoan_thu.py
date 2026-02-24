@@ -50,7 +50,7 @@ class LogSyncReceiveKhoanThu(models.Model):
 
             if action == 'delete':
                 if product:
-                    product.unlink()
+                    product.write({'active': False})
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 

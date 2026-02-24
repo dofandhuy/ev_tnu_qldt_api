@@ -47,7 +47,7 @@ class LogSyncReceiveKyHoc(models.Model):
             # 1. Xử lý xóa
             if action == 'delete':
                 if semester:
-                    semester.unlink()
+                    semester.write({'active': False})
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 

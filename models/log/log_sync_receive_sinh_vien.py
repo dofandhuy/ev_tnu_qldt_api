@@ -43,7 +43,7 @@ class LogSyncReceiveStudent(models.Model):
 
             if action == 'delete':
                 if student:
-                    student.unlink()
+                    student.write({'active': False})
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 
