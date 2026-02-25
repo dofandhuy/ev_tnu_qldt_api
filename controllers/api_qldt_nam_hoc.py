@@ -40,7 +40,7 @@ class QLDTNamHoc(Controller):
             ma_nam_hoc = data.get('ma_nam_hoc')
 
             ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
-            business_unit = self.env['res.business.unit'].sudo().search([
+            business_unit = request.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
             if not business_unit:
@@ -87,7 +87,12 @@ class QLDTNamHoc(Controller):
 
                 # Thực thi xử lý
                 res_code = log_sync.action_handle()
+                res_msg = "Thành công" if res_code == '000' else "Thất bại"
+                response_data = {'code': res_code, 'message': res_msg}
 
+                log_sync.sudo().write({
+                    'response': json.dumps(response_data, ensure_ascii=False)
+                })
                 if res_code == '000':
                     return Response.success('Đồng bộ năm học thành công', data={'code': res_code}).to_json()
                 else:

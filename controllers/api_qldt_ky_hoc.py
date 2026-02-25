@@ -21,7 +21,7 @@ class QLDTKyhoc(Controller):
         try:
             verify = [
                       "ma_ky_hoc", "ten_ky_hoc",
-                      "nam_hoc_id", "ten_nam_hoc", "ma_don_vi",
+                      "ma_nam_hoc", "ten_nam_hoc", "ma_don_vi",
                       "phan_loai"
             ]
             params = request.httprequest.json
@@ -40,7 +40,7 @@ class QLDTKyhoc(Controller):
             success_msg = "Thành công"
 
             ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
-            business_unit = self.env['res.business.unit'].sudo().search([
+            business_unit = request.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
             if not business_unit:
@@ -49,7 +49,9 @@ class QLDTKyhoc(Controller):
                 return '096'
 
             if action in ['update', 'delete'] and code=='000':
-                sem_exists = request.env['hp.ky.hoc'].sudo().search([('ma_ky_hoc', '=', ma_ky_hoc), ('business_unit_id','=',business_unit.id)])
+                sem_exists = request.env['hp.ky.hoc'].sudo().search([('ma_ky_hoc', '=', ma_ky_hoc),
+                                                                     ('business_unit_id','=',business_unit.id)])
+
                 if not sem_exists:
                     success_code, success_msg = "147", "Kỳ học không tồn tại"
 
@@ -64,6 +66,13 @@ class QLDTKyhoc(Controller):
 
                 # Gọi handle bên trong khối IF này để không bị lỗi "referenced before assignment"
                 res_code = log_sync.action_handle()
+
+                res_msg = "Thành công" if res_code == '000' else "Thất bại"
+                response_data = {'code': res_code, 'message': res_msg}
+
+                log_sync.sudo().write({
+                    'response': json.dumps(response_data, ensure_ascii=False)
+                })
 
                 if res_code == '000':
                     return Response.success('Đồng bộ kỳ học thành công', data={'code': res_code}).to_json()

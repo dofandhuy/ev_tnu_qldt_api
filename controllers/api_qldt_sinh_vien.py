@@ -57,6 +57,13 @@ class QLDTStudent(Controller):
                 # Thực thi xử lý
                 res_code = log_sync.action_handle()
 
+                res_msg = "Thành công" if res_code == '000' else "Thất bại"
+                response_data = {'code': res_code, 'message': res_msg}
+
+                log_sync.sudo().write({
+                    'response': json.dumps(response_data, ensure_ascii=False)
+                })
+
                 if res_code == '000':
                     return Response.success('Đồng bộ sinh viên thành công', data={'code': res_code}).to_json()
                 else:

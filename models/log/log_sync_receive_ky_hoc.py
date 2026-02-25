@@ -52,7 +52,7 @@ class LogSyncReceiveKyHoc(models.Model):
 
             SemObj = self.env['hp.ky.hoc'].sudo()
             semester = SemObj.search([('ma_ky_hoc', '=', ma_ky_hoc),
-                                      ('business_unit_id', '=','bussiness_unit.id')],
+                                      ('business_unit_id', '=',business_unit.id)],
                                       limit=1)
 
             # 1. Xử lý xóa
@@ -62,10 +62,10 @@ class LogSyncReceiveKyHoc(models.Model):
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 
-            search_year_code = data.get('nam_hoc_id') or data.get('ma_nam_hoc')
+            search_year_code = str(data.get('ma_nam_hoc') or '').strip()
 
             year_rec = self.env['hp.nam.hoc'].sudo().search([('ma_nam_hoc', '=', search_year_code),
-                                                             ('business_unit_id','=','business_unit.id')],
+                                                             ('business_unit_id','=',business_unit.id)],
                                                              limit=1)
 
             if not year_rec:
@@ -81,6 +81,7 @@ class LogSyncReceiveKyHoc(models.Model):
             vals = {
                 'ma_ky_hoc': ma_ky_hoc,
                 'ten_ky_hoc': data.get('ten_ky_hoc') or ma_ky_hoc,
+                'ma_nam_hoc': search_year_code,
                 'nam_hoc_id': year_rec.id,
                 'ma_don_vi': ma_dv_raw,
                 'phan_loai': val_phan_loai,

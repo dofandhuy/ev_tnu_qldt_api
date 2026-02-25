@@ -63,7 +63,7 @@ class LogSyncReceiveKhoanThu(models.Model):
 
             ProdObj = self.env['product.template'].sudo()
             product = ProdObj.search([('default_code', '=', sku),
-                                      ('company_id','=','target_company_id')],
+                                      ('company_id','=',target_company_id)],
                                      limit=1)
 
             if action == 'delete':
@@ -78,6 +78,8 @@ class LogSyncReceiveKhoanThu(models.Model):
                 'default_code': sku,
                 'name': data.get('name'),
                 'company_id': target_company_id,
+                'type': 'service',
+                'detailed_type': 'service',
                 'sale_ok': True,
                 'purchase_ok': False,
             }
