@@ -9,7 +9,7 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
-class LogSyncReceiveKyHoc(models.Model):
+class LogSyncReceiveSemester(models.Model):
     _name = 'log.sync.receive.semester'
     _inherit = 'log.sync.receive'
     _description = 'Log nhận đồng bộ kỳ học'
@@ -17,7 +17,7 @@ class LogSyncReceiveKyHoc(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        res = super(LogSyncReceiveKyHoc, self).create(vals_list)
+        res = super(LogSyncReceiveSemester, self).create(vals_list)
         for log in res:
             log.code = 'LSRS' + str(log.id)  # LSRS: Semester
         return res
@@ -36,7 +36,7 @@ class LogSyncReceiveKyHoc(models.Model):
             data = inner_params.get('data') or raw_data.get('data') or {}
             action = raw_data.get('action') or inner_params.get('action')
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            ma_dv_raw = str(data.get('unit_code') or '').strip()
             business_unit = self.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
@@ -45,7 +45,7 @@ class LogSyncReceiveKyHoc(models.Model):
 
                 return '096'
 
-            ma_ky_hoc = str(data.get('ma_ky_hoc') or '').strip()
+            ma_ky_hoc = str(data.get('semester_code') or '').strip()
             if not ma_ky_hoc:
                 _logger.error("Dữ liệu thiếu ma_ky_hoc")
                 return '096'
@@ -62,7 +62,7 @@ class LogSyncReceiveKyHoc(models.Model):
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 
-            search_year_code = str(data.get('ma_nam_hoc') or '').strip()
+            search_year_code = str(data.get('year_code') or '').strip()
 
             year_rec = self.env['hp.nam.hoc'].sudo().search([('ma_nam_hoc', '=', search_year_code),
                                                              ('business_unit_id','=',business_unit.id)],
@@ -73,14 +73,14 @@ class LogSyncReceiveKyHoc(models.Model):
                 return '096'
 
             # 3. Chuẩn hóa Phân loại
-            raw_phan_loai = data.get('phan_loai', '')
+            raw_phan_loai = data.get('type', '')
             val_phan_loai = 'ky_chinh'
             if any(x in str(raw_phan_loai).lower() for x in ['phu']):
                 val_phan_loai = 'ky_phu'
 
             vals = {
                 'ma_ky_hoc': ma_ky_hoc,
-                'ten_ky_hoc': data.get('ten_ky_hoc') or ma_ky_hoc,
+                'ten_ky_hoc': data.get('semester_name'),
                 'ma_nam_hoc': search_year_code,
                 'nam_hoc_id': year_rec.id,
                 'ma_don_vi': ma_dv_raw,

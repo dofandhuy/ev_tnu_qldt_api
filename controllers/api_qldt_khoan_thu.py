@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 api_url = Route('revenue', version='1', app='qldt')
 
-class QLDTKhoanThu(Controller):
+class QLDTRevenue(Controller):
 
     @route(route=api_url, methods=['POST'], auth='public', type='json')
     def purchase(self, **post):
         try:
-            verify = ["default_code","name","ma_don_vi"]
+            verify = ["default_code","name","unit_code"]
             params = request.httprequest.json
 
             result, code, message, remote_ip, api_name, api_id = utils.check_error(

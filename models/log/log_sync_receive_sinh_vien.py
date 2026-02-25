@@ -35,7 +35,7 @@ class LogSyncReceiveStudent(models.Model):
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            ma_dv_raw = str(data.get('unit_code') or '').strip()
             business_unit = self.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
@@ -43,7 +43,7 @@ class LogSyncReceiveStudent(models.Model):
                 _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
                 return '096'
 
-            ma_sv = data.get('ma_sinh_vien')
+            ma_sv = data.get('student_code')
             if not ma_sv: return '096'
             PartnerObj = self.env['res.partner'].sudo()
             student = PartnerObj.search([('ma_sinh_vien', '=', ma_sv),
@@ -64,11 +64,10 @@ class LogSyncReceiveStudent(models.Model):
 
             vals = {
                 'ma_sinh_vien': ma_sv,
-                'name': data.get('name'),
-                'ngay_sinh': data.get('ngay_sinh'),
-                'gioi_tinh': data.get('gioi_tinh'),
-                'la_sinh_vien': True,
-                'ma_don_vi': str(data.get('ma_don_vi') or '').strip(),
+                'name': data.get('full_name'),
+                'ngay_sinh': data.get('birthday'),
+                'gioi_tinh': data.get('gender'),
+                'ma_don_vi': str(data.get('unit_code') or '').strip(),
                 'business_unit_id': business_unit.id,
             }
 

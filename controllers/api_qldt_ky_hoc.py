@@ -14,15 +14,15 @@ logger = logging.getLogger(__name__)
 
 api_url = Route('semester', version='1', app='qldt')
 
-class QLDTKyhoc(Controller):
+class QLDTSemester(Controller):
 
     @route(route=api_url, methods=['POST'], auth='public', type='json')
     def semester(self,**post):
         try:
             verify = [
-                      "ma_ky_hoc", "ten_ky_hoc",
-                      "ma_nam_hoc", "ten_nam_hoc", "ma_don_vi",
-                      "phan_loai"
+                      "semester_code", "semester_name",
+                      "year_code", "year_name", "unit_code",
+                      "type"
             ]
             params = request.httprequest.json
 
@@ -35,11 +35,11 @@ class QLDTKyhoc(Controller):
 
             data = params.get('data', {})
             action = params.get('action')
-            ma_ky_hoc = data.get('ma_ky_hoc')
+            ma_ky_hoc = data.get('semester_code')
             success_code = "000"
             success_msg = "Thành công"
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            ma_dv_raw = str(data.get('unit_code') or '').strip()
             business_unit = request.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)

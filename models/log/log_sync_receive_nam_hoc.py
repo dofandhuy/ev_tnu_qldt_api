@@ -2,7 +2,7 @@
 import json
 import logging
 
-from Tools.scripts.fixcid import Char
+
 from odoo import models, fields, api, _
 from datetime import datetime
 from odoo.exceptions import ValidationError
@@ -10,7 +10,7 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
-class LogSyncReceiveNamHoc(models.Model):
+class LogSyncReceiveYears(models.Model):
     _name = 'log.sync.receive.years'
     _inherit = 'log.sync.receive'
     _description = 'Log nhận đồng bộ năm học'
@@ -18,7 +18,7 @@ class LogSyncReceiveNamHoc(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        res = super(LogSyncReceiveNamHoc, self).create(vals_list)
+        res = super(LogSyncReceiveYears, self).create(vals_list)
         for log in res:
             log.code = 'LSRY' + str(log.id)  # LSRY: Log Sync Receive Nam Hoc
         return res
@@ -36,7 +36,7 @@ class LogSyncReceiveNamHoc(models.Model):
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            ma_dv_raw = str(data.get('unit_code') or '').strip()
             business_unit = self.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
@@ -45,7 +45,7 @@ class LogSyncReceiveNamHoc(models.Model):
                 _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
                 return '096'
 
-            year_code = str(data.get('ma_nam_hoc') or '').strip()
+            year_code = str(data.get('year_code') or '').strip()
             YearObj = self.env['hp.nam.hoc'].sudo()
             year = YearObj.search([('ma_nam_hoc', '=', year_code),
                                    ('business_unit_id', '=', business_unit.id)],
@@ -62,11 +62,11 @@ class LogSyncReceiveNamHoc(models.Model):
 
                     'ma_nam_hoc': year_code,
 
-                    'ten_nam_hoc': str(data.get('ten_nam_hoc') or '').strip(),
+                    'ten_nam_hoc': str(data.get('year_name') or '').strip(),
 
-                    'nam_bat_dau': str(data.get('nam_bat_dau') or 0).strip(),
+                    'nam_bat_dau': str(data.get('year_start') or 0).strip(),
 
-                    'nam_ket_thuc': str(data.get('nam_ket_thuc') or 0).strip(),
+                    'nam_ket_thuc': str(data.get('year_end') or 0).strip(),
 
                     'ma_don_vi': ma_dv_raw,
 

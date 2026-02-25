@@ -20,7 +20,7 @@ class QLDTStudent(Controller):
     @route(route=api_url, methods=['POST'], auth='public', type='json', csrf=False)
     def student(self, **post):
         try:
-            verify = ["ma_sinh_vien", "name", "ngay_sinh", "gioi_tinh","la_sinh_vien", "ma_don_vi"]
+            verify = ["student_code", "full_name", "birthday", "gender", "unit_code"]
             params = request.httprequest.json
 
             result, code, message, remote_ip, api_name, api_id = utils.check_error(
@@ -32,7 +32,7 @@ class QLDTStudent(Controller):
 
             data = params.get('data', {})
             action = params.get('action')
-            ma_sinh_vien = data.get('ma_sinh_vien')
+            ma_sinh_vien = data.get('student_code')
             code = "000"
             message = "Thành công"
 

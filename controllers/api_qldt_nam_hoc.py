@@ -13,17 +13,16 @@ logger = logging.getLogger(__name__)
 api_url = Route('years', version='1', app='qldt')
 
 
-class QLDTNamHoc(Controller):
+class QLDTYears(Controller):
 
     @route(route=api_url, methods=['POST'], auth='public', type='json')
     def years(self):
         try:
 
 
-            # 1. Định nghĩa các trường bắt buộc
             verify = [
-                "ma_nam_hoc", "ten_nam_hoc", "nam_bat_dau",
-                "nam_ket_thuc", "ma_don_vi"
+                "year_code", "year_name", "year_start",
+                "year_end", "unit_code"
             ]
             params = request.httprequest.json
 
@@ -37,9 +36,9 @@ class QLDTNamHoc(Controller):
 
             data = params.get('data', {})
             action = params.get('action')
-            ma_nam_hoc = data.get('ma_nam_hoc')
+            ma_nam_hoc = data.get('year_code')
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            ma_dv_raw = str(data.get('unit_code') or '').strip()
             business_unit = request.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
@@ -53,8 +52,8 @@ class QLDTNamHoc(Controller):
             message = "Thành công"
 
             # 3. VERIFY LOGIC NGHIỆP VỤ
-            nam_bat_dau = int(data.get('nam_bat_dau') or 0)
-            nam_ket_thuc = int(data.get('nam_ket_thuc') or 0)
+            nam_bat_dau = int(data.get('year_start') or 0)
+            nam_ket_thuc = int(data.get('year_end') or 0)
 
             # Kiểm tra logic năm
             if nam_bat_dau and nam_ket_thuc:

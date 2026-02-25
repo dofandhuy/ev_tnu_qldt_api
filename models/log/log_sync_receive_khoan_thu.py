@@ -8,7 +8,7 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
-class LogSyncReceiveKhoanThu(models.Model):
+class LogSyncReceiveRevenue(models.Model):
     _name = 'log.sync.receive.revenue'
     _inherit = 'log.sync.receive'
     _description = 'Log nhận đồng bộ Khoản thu'
@@ -16,7 +16,7 @@ class LogSyncReceiveKhoanThu(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        res = super(LogSyncReceiveKhoanThu, self).create(vals_list)
+        res = super(LogSyncReceiveRevenue, self).create(vals_list)
         for log in res:
             log.code = 'LSRP' + str(log.id)
         return res
@@ -38,7 +38,7 @@ class LogSyncReceiveKhoanThu(models.Model):
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
 
-            ma_dv_raw = str(data.get('ma_don_vi') or '').strip()
+            ma_dv_raw = str(data.get('unit_code') or '').strip()
             if not ma_dv_raw:
                 _logger.error("Dữ liệu thiếu ma_don_vi để xác định Company")
                 return '096'
