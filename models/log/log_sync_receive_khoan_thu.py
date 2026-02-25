@@ -40,7 +40,7 @@ class LogSyncReceiveRevenue(models.Model):
 
             ma_dv_raw = str(data.get('unit_code') or '').strip()
             if not ma_dv_raw:
-                _logger.error("Dữ liệu thiếu ma_don_vi để xác định Company")
+                _logger.error("Dữ liệu thiếu Unit Code để xác định Company")
                 return '096'
 
             # Tra cứu Business Unit dựa trên code gửi về
