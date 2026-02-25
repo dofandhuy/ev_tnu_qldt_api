@@ -21,6 +21,10 @@
     'data': [
         'security/ir.model.access.csv',
         'data/qldt_api_config_data.xml',
-        'data/api_qldt_login_data.xml'
+        'data/api_qldt_login_data.xml',
+        'views/log_sync_receive_khoan_thu_views.xml',
+        'views/log_sync_receive_semester_views.xml',
+        'views/log_sync_receive_sinh_vien_views.xml',
+        'views/log_sync_receive_years_views.xml',
     ],
 }
