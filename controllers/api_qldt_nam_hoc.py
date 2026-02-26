@@ -8,7 +8,7 @@ from odoo.addons.izi_lib.helpers.Response import Response
 from odoo.addons.ev_tnu_api_utils.controllers import utils
 from odoo.addons.ev_tnu_api_utils.controllers.code_response import RESPONSE_CODE_MSG
 from odoo.addons.ev_config_connect_api.helpers import Configs
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 api_url = Route('years', version='1', app='qldt')
 
@@ -18,35 +18,22 @@ class QLDTYears(Controller):
     @route(route=api_url, methods=['POST'], auth='public', type='json')
     def years(self):
         try:
-
-
             verify = [
                 "year_code", "year_name", "year_start",
-                "year_end", "unit_code"
+                "year_end", "unit_code","qldt_id_years"
             ]
             params = request.httprequest.json
 
             result, code, message, remote_ip, api_name, api_id = utils.check_error(
                 request, api_url, require_params=verify
-
             )
-
             if result:
                 raise ApiException(message=message, code=code)
 
             data = params.get('data', {})
             action = params.get('action')
-            ma_nam_hoc = data.get('year_code')
-
-            ma_dv_raw = str(data.get('unit_code') or '').strip()
-            business_unit = request.env['res.business.unit'].sudo().search([
-                ('code', '=', ma_dv_raw)
-            ], limit=1)
-            if not business_unit:
-                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
-
-                return '096'
-
+            qldt_id = data.get('qldt_id_years')
+            if not qldt_id: return '096'
 
             code = "000"
             message = "Thành công"
@@ -64,12 +51,11 @@ class QLDTYears(Controller):
             # Kiểm tra tồn tại đối với hành động sửa/xóa (sử dụng model hp.nam.hoc)
             if code == '000' and action in ['update', 'delete']:
                 year_id = request.env['hp.nam.hoc'].sudo().search([
-                    ('ma_nam_hoc', '=', ma_nam_hoc),
-                    ('business_unit_id', '=', business_unit.id),
+                    ('qldt_id_years', '=', qldt_id),
                 ], limit=1)
                 if not year_id:
                     code = '147'
-                    message = f'Năm học (Mã: {ma_nam_hoc}) không tồn tại trong hệ thống'
+                    message = f'Năm học (Mã: {qldt_id}) không tồn tại trong hệ thống'
 
             # 4. GHI LOG API HỆ THỐNG
             Configs._set_log_api(remote_ip, api_url, api_name, params, code, message)
@@ -100,6 +86,6 @@ class QLDTYears(Controller):
         except ApiException as e:
             return e.to_json()
         except Exception as e:
-            logger.error("API QLDT Years Critical Error: %s", str(e), exc_info=True)
+            _logger.error("API QLDT Years Critical Error: %s", str(e), exc_info=True)
             return Response.error(message="Lỗi hệ thống: " + str(e), code="500").to_json()
 

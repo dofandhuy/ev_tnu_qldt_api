@@ -36,6 +36,7 @@ class LogSyncReceiveYears(models.Model):
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
 
+
             ma_dv_raw = str(data.get('unit_code') or '').strip()
             business_unit = self.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
@@ -43,24 +44,36 @@ class LogSyncReceiveYears(models.Model):
 
             if not business_unit:
                 _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
-                return '096'
+                return '147'
 
-            year_code = str(data.get('year_code') or '').strip()
+
+            qldt_id = data.get('qldt_id_years')
             YearObj = self.env['hp.nam.hoc'].sudo()
-            year = YearObj.search([('ma_nam_hoc', '=', year_code),
-                                   ('business_unit_id', '=', business_unit.id)],
+            year = YearObj.search([('qldt_id_years', '=', qldt_id),('business_unit_id','=', business_unit.id)],
                                   limit=1)
+            if not year:
+                # Nếu không tìm thấy mà lại yêu cầu Update hoặc Delete thì báo lỗi
+                if action in ['update', 'delete']:
+                    _logger.error("Lỗi: Yêu cầu %s nhưng ID %s không tồn tại", action, qldt_id)
+                    return '147'
+            else:
+                # Nếu đã tìm thấy mà lại yêu cầu Create thì báo lỗi trùng
+                if action == 'create':
+                    _logger.error("Lỗi: Yêu cầu create nhưng ID %s đã tồn tại", qldt_id)
+                    return '147'
 
             if action == 'delete':
                 if year:
                     year.write({'active': False})
+                    self.write({'state': 'done', 'date_done': datetime.now()})
+                    return '000'
 
 
-            else:
 
-                vals = {
+            vals = {
+                    'qldt_id_years': qldt_id,
 
-                    'ma_nam_hoc': year_code,
+                    'ma_nam_hoc': str(data.get('year_code') or '').strip(),
 
                     'ten_nam_hoc': str(data.get('year_name') or '').strip(),
 
@@ -70,16 +83,14 @@ class LogSyncReceiveYears(models.Model):
 
                     'ma_don_vi': ma_dv_raw,
 
-                    'business_unit_id': business_unit.id,
+                    'business_unit_id': business_unit.id if business_unit else False,
 
                 }
 
-                if not year:
-
+            if not year:
                     YearObj.create(vals)
 
-                else:
-
+            else:
                     year.write(vals)
 
             self.write({'state': 'done', 'date_done': datetime.now()})

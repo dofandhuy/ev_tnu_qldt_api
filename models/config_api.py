@@ -10,5 +10,5 @@ class ConfigAPI(models.Model):
         ("/api/v1/qldt/semester", "/api/v1/qldt/semester"),
         ("/api/v1/qldt/login", "/api/v1/qldt/login"),
         ("/api/v1/qldt/student", "/api/v1/qldt/student"),
-        ("/api/v1/qldt/revenue", "/api/v1/qldt/revenue"),
+        ("/api/v1/qldt/product", "/api/v1/qldt/product"),
     ])

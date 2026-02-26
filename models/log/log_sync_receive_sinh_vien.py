@@ -6,6 +6,8 @@ import logging
 from datetime import datetime
 from odoo.exceptions import ValidationError
 
+_logger = logging.getLogger(__name__)
+
 class LogSyncReceiveStudent(models.Model):
     _name = 'log.sync.receive.student'
     _inherit = 'log.sync.receive'
@@ -39,16 +41,30 @@ class LogSyncReceiveStudent(models.Model):
             business_unit = self.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
+
             if not business_unit:
                 _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
-                return '096'
+                return '147'
 
-            ma_sv = data.get('student_code')
-            if not ma_sv: return '096'
+            qldt_id = data.get('qldt_id_student')
+            if not qldt_id:
+                _logger.error("Dữ liệu thiếu qldt_id_student")
+                return '145'
+
+
             PartnerObj = self.env['res.partner'].sudo()
-            student = PartnerObj.search([('ma_sinh_vien', '=', ma_sv),
-                                         ('business_unit_id','=',business_unit.id)],
-                                        limit=1)
+            student = PartnerObj.search([('qldt_id_student', '=', qldt_id),
+                                         ('business_unit_id','=',business_unit.id)], limit=1)
+
+            if not student:
+                if action in ['update', 'delete']:
+                    _logger.error("Lỗi: Yêu cầu %s nhưng ID %s không tồn tại", action, qldt_id)
+                    return '147'
+            else:
+                if action == 'create':
+                    _logger.error("Lỗi: Yêu cầu create nhưng ID %s đã tồn tại", qldt_id)
+                    return '147'
+
 
             if action == 'delete':
                 if student:
@@ -56,19 +72,15 @@ class LogSyncReceiveStudent(models.Model):
                 self.write({'state': 'done', 'date_done': datetime.now()})
                 return '000'
 
-            # Helper tìm ID từ mã
-            def get_id(model, code):
-                return self.env[model].sudo().search([('code', '=', code)], limit=1).id if code else False
-
-
-
             vals = {
-                'ma_sinh_vien': ma_sv,
+                'qldt_id_student': qldt_id,
+                'ma_sinh_vien': data.get('student_code'),
                 'name': data.get('full_name'),
                 'ngay_sinh': data.get('birthday'),
                 'gioi_tinh': data.get('gender'),
                 'ma_don_vi': str(data.get('unit_code') or '').strip(),
-                'business_unit_id': business_unit.id,
+                'la_sinh_vien': True,
+                'business_unit_id': business_unit.id ,
             }
 
             if not student:
@@ -78,6 +90,9 @@ class LogSyncReceiveStudent(models.Model):
 
             self.write({'state': 'done', 'date_done': datetime.now()})
             return '000'
-        except Exception:
-            self.write({'state': 'fail'})
+        except Exception as e:
+            _logger.error("Lỗi thực thi action_handle: %s", str(e))
+            self.write({'state': 'fail',
+                        'date_done': datetime.now(),
+                       })
             return '096'

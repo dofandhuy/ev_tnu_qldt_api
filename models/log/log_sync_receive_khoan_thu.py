@@ -8,15 +8,15 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
-class LogSyncReceiveRevenue(models.Model):
-    _name = 'log.sync.receive.revenue'
+class LogSyncReceiveProduct(models.Model):
+    _name = 'log.sync.receive.product'
     _inherit = 'log.sync.receive'
     _description = 'Log nhận đồng bộ Khoản thu'
     _rec_name = 'code'
 
     @api.model_create_multi
     def create(self, vals_list):
-        res = super(LogSyncReceiveRevenue, self).create(vals_list)
+        res = super(LogSyncReceiveProduct, self).create(vals_list)
         for log in res:
             log.code = 'LSRP' + str(log.id)
         return res
@@ -38,33 +38,42 @@ class LogSyncReceiveRevenue(models.Model):
             action = params.get('action')  # Lấy hành động: 'update' hay 'delete'
             data = params.get('data') or {}
 
+            qldt_id = data.get('qldt_id_product')
+            if not qldt_id:
+                _logger.error("Dữ liệu thiếu qldt_id_product")
+                return '145'
+
             ma_dv_raw = str(data.get('unit_code') or '').strip()
             if not ma_dv_raw:
                 _logger.error("Dữ liệu thiếu Unit Code để xác định Company")
-                return '096'
+                return '145'
 
-            # Tra cứu Business Unit dựa trên code gửi về
             business_unit = self.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
 
             if not business_unit:
                 _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
-                return '096'
+                return '147'
 
             target_company_id = business_unit.company_id.id
             if not target_company_id:
                 _logger.error("Business Unit %s chưa được gán Company", ma_dv_raw)
                 return '096'
 
-            sku = data.get('default_code')
-
-            if not sku: return '096'
 
             ProdObj = self.env['product.template'].sudo()
-            product = ProdObj.search([('default_code', '=', sku),
-                                      ('company_id','=',target_company_id)],
+            product = ProdObj.search([('qldt_id_product', '=', qldt_id),('company_id','=', target_company_id)],
                                      limit=1)
+
+            if not product:
+                if action in ['update', 'delete']:
+                    _logger.error("Lỗi: Yêu cầu %s nhưng ID %s không tồn tại", action, qldt_id)
+                    return '147'
+            else:
+                if action == 'create':
+                    _logger.error("Lỗi: Yêu cầu create nhưng ID %s đã tồn tại", qldt_id)
+                    return '147'
 
             if action == 'delete':
                 if product:
@@ -75,7 +84,8 @@ class LogSyncReceiveRevenue(models.Model):
 
 
             vals = {
-                'default_code': sku,
+                'qldt_id_product': qldt_id,
+                'default_code': data.get('default_code'),
                 'name': data.get('name'),
                 'company_id': target_company_id,
                 'type': 'service',

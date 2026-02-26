@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="log_sync_receive_revenue_search_view" model="ir.ui.view">
-            <field name="name">log_sync_receive_revenue_search_view</field>
-            <field name="model">log.sync.receive.revenue</field>
+        <record id="log_sync_receive_product_search_view" model="ir.ui.view">
+            <field name="name">log_sync_receive_product_search_view</field>
+            <field name="model">log.sync.receive.product</field>
             <field name="arch" type="xml">
                 <search>
                     <field name="params" string="Params" filter_domain="[('params', 'ilike', self)]"/>
                 </search>
             </field>
         </record>
-        <record id="log_sync_receive_revenue_tree_view" model="ir.ui.view">
-            <field name="name">log_sync_receive_revenue_tree_view</field>
-            <field name="model">log.sync.receive.revenue</field>
+        <record id="log_sync_receive_product_tree_view" model="ir.ui.view">
+            <field name="name">log_sync_receive_product_tree_view</field>
+            <field name="model">log.sync.receive.product</field>
             <field name="arch" type="xml">
                 <tree create="0" delete="0" default_order='create_date desc'>
                     <field name="code"/>
@@ -29,9 +29,9 @@
             </field>
         </record>
 
-        <record id="log_sync_receive_revenue_form_view" model="ir.ui.view">
-            <field name="name">log_sync_receive_revenue_form_view</field>
-            <field name="model">log.sync.receive.revenue</field>
+        <record id="log_sync_receive_product_form_view" model="ir.ui.view">
+            <field name="name">log_sync_receive_product_form_view</field>
+            <field name="model">log.sync.receive.product</field>
             <field name="arch" type="xml">
                 <form create="0" delete="0" edit="0">
                     <header>
@@ -59,16 +59,16 @@
                 </form>
             </field>
         </record>
-        <record id="log_sync_receive_revenue_action" model="ir.actions.act_window">
-            <field name="name">Log Sync Receive Revenue</field>
+        <record id="log_sync_receive_product_action" model="ir.actions.act_window">
+            <field name="name">Log Sync Receive Product</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">log.sync.receive.revenue</field>
+            <field name="res_model">log.sync.receive.product</field>
             <field name="view_mode">tree,form</field>
-            <field name="search_view_id" ref="log_sync_receive_revenue_search_view"/>
+            <field name="search_view_id" ref="log_sync_receive_product_search_view"/>
         </record>
-        <menuitem id="log_sync_receive_revenue_menu"
+        <menuitem id="log_sync_receive_product_menu"
                   name="Log nhận đồng bộ khoản thu"
-                  action="log_sync_receive_revenue_action"
+                  action="log_sync_receive_product_action"
                   parent="ev_api_sync_base.log_sync_receive_menu"
                   sequence="10"/>
     </data>

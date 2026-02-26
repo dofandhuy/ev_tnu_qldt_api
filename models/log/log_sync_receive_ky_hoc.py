@@ -5,7 +5,6 @@ from odoo import models, fields, api, _
 from datetime import datetime
 from odoo.exceptions import ValidationError
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -40,52 +39,68 @@ class LogSyncReceiveSemester(models.Model):
             business_unit = self.env['res.business.unit'].sudo().search([
                 ('code', '=', ma_dv_raw)
             ], limit=1)
+
             if not business_unit:
                 _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
+                return '147'
 
-                return '096'
-
-            ma_ky_hoc = str(data.get('semester_code') or '').strip()
-            if not ma_ky_hoc:
-                _logger.error("Dữ liệu thiếu ma_ky_hoc")
-                return '096'
+            qldt_id = data.get('qldt_id_semester') or 0
+            if not qldt_id:
+                _logger.error("Dữ liệu thiếu qldt_id_semester")
+                return '145'
 
             SemObj = self.env['hp.ky.hoc'].sudo()
-            semester = SemObj.search([('ma_ky_hoc', '=', ma_ky_hoc),
-                                      ('business_unit_id', '=',business_unit.id)],
-                                      limit=1)
+            semester = SemObj.search([('qldt_id_semester', '=', qldt_id),
+                                      ('business_unit_id', '=', business_unit.id), ],
+                                     limit=1)
+
+            if not semester:
+                # Nếu không tìm thấy mà đòi Update hoặc Delete thì báo lỗi
+                if action in ['update', 'delete']:
+                    _logger.error("Lỗi: Yêu cầu %s nhưng Kỳ học ID %s không tồn tại", action, qldt_id)
+                    return '147'
+            else:
+                # Nếu đã có bản ghi mà đòi Create thì báo lỗi trùng
+                if action == 'create':
+                    _logger.error("Lỗi: Yêu cầu create nhưng Kỳ học ID %s đã tồn tại", qldt_id)
+                    return '147'
 
             # 1. Xử lý xóa
             if action == 'delete':
                 if semester:
                     semester.write({'active': False})
-                self.write({'state': 'done', 'date_done': datetime.now()})
-                return '000'
+                    self.write({'state': 'done', 'date_done': datetime.now()})
+                    return '000'
 
-            search_year_code = str(data.get('year_code') or '').strip()
+            search_year_code = data.get('qldt_id_years')
 
-            year_rec = self.env['hp.nam.hoc'].sudo().search([('ma_nam_hoc', '=', search_year_code),
-                                                             ('business_unit_id','=',business_unit.id)],
-                                                             limit=1)
-
+            year_rec = self.env['hp.nam.hoc'].sudo().search([('qldt_id_years', '=', search_year_code),
+                                                             ('business_unit_id', '=', business_unit.id), ],
+                                                            limit=1)
             if not year_rec:
                 _logger.error("Không tìm thấy Năm học với mã: %s", search_year_code)
-                return '096'
+                return '147'
 
-            # 3. Chuẩn hóa Phân loại
+            ma_ky_hoc = str(data.get('semester_code') or '').strip()
+            if not ma_ky_hoc:
+                _logger.error("Dữ liệu thiếu ma_ky_hoc")
+                return '145'
+
             raw_phan_loai = data.get('type', '')
             val_phan_loai = 'ky_chinh'
             if any(x in str(raw_phan_loai).lower() for x in ['phu']):
                 val_phan_loai = 'ky_phu'
 
             vals = {
+                'qldt_id_semester': qldt_id,
                 'ma_ky_hoc': ma_ky_hoc,
                 'ten_ky_hoc': data.get('semester_name'),
-                'ma_nam_hoc': search_year_code,
                 'nam_hoc_id': year_rec.id,
+                'ma_nam_hoc': year_rec.ma_nam_hoc,
                 'ma_don_vi': ma_dv_raw,
                 'phan_loai': val_phan_loai,
                 'business_unit_id': business_unit.id,
+                'active': True,
             }
 
             if not semester:

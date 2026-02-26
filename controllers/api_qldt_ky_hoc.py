@@ -21,8 +21,8 @@ class QLDTSemester(Controller):
         try:
             verify = [
                       "semester_code", "semester_name",
-                      "year_code", "year_name", "unit_code",
-                      "type"
+                      "qldt_id_years", "unit_code",
+                      "type","qldt_id_semester"
             ]
             params = request.httprequest.json
 
@@ -35,27 +35,21 @@ class QLDTSemester(Controller):
 
             data = params.get('data', {})
             action = params.get('action')
-            ma_ky_hoc = data.get('semester_code')
+            qldt_id = data.get('qldt_id_semester')
+            if not qldt_id:  return '096'
             success_code = "000"
             success_msg = "Thành công"
 
-            ma_dv_raw = str(data.get('unit_code') or '').strip()
-            business_unit = request.env['res.business.unit'].sudo().search([
-                ('code', '=', ma_dv_raw)
-            ], limit=1)
-            if not business_unit:
-                _logger.error("Không tìm thấy Business Unit với mã: %s", ma_dv_raw)
 
-                return '096'
 
             if action in ['update', 'delete'] and code=='000':
-                sem_exists = request.env['hp.ky.hoc'].sudo().search([('ma_ky_hoc', '=', ma_ky_hoc),
-                                                                     ('business_unit_id','=',business_unit.id)])
+                sem_exists = request.env['hp.ky.hoc'].sudo().search([('qldt_id_semester', '=', qldt_id)], limit=1)
 
                 if not sem_exists:
                     success_code, success_msg = "147", "Kỳ học không tồn tại"
 
             Configs._set_log_api(remote_ip, api_url, api_name, params, success_code, success_msg)
+
             if success_code == '000':
                 log_sync = request.env['log.sync.receive.semester'].sudo().create({
                     'params': json.dumps(params, ensure_ascii=False),
@@ -64,7 +58,6 @@ class QLDTSemester(Controller):
                     'ip_address': remote_ip
                 })
 
-                # Gọi handle bên trong khối IF này để không bị lỗi "referenced before assignment"
                 res_code = log_sync.action_handle()
 
                 res_msg = "Thành công" if res_code == '000' else "Thất bại"

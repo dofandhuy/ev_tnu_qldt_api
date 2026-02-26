@@ -20,7 +20,7 @@ class QLDTStudent(Controller):
     @route(route=api_url, methods=['POST'], auth='public', type='json', csrf=False)
     def student(self, **post):
         try:
-            verify = ["student_code", "full_name", "birthday", "gender", "unit_code"]
+            verify = ["student_code", "full_name", "birthday", "gender", "unit_code","qldt_id_student"]
             params = request.httprequest.json
 
             result, code, message, remote_ip, api_name, api_id = utils.check_error(
@@ -32,17 +32,19 @@ class QLDTStudent(Controller):
 
             data = params.get('data', {})
             action = params.get('action')
-            ma_sinh_vien = data.get('student_code')
+            qldt_id = data.get('qldt_id_student')
+            if not qldt_id: return '096'
             code = "000"
             message = "Thành công"
 
-            if code == '000' and action in ['update', 'delete']:
+            if action in ['update', 'delete']:
                 student_id = request.env['res.partner'].sudo().search([
-                    ('ma_sinh_vien', '=', ma_sinh_vien),
+                    ('qldt_id_student', '=', qldt_id),
                 ], limit=1)
+
                 if not student_id:
                     code = '147'
-                    message = f'Học sinh (Mã: {ma_sinh_vien}) không tồn tại trong hệ thống'
+                    message = f'Học sinh (ID QLDT: {qldt_id}) không tồn tại trong hệ thống'
 
             Configs._set_log_api(remote_ip, api_url, api_name, params, code, message)
             if code == '000':
