@@ -1,0 +1,30 @@
+<odoo>
+    <data noupdate="1">
+        <record id="api_login_config" model="config.api">
+            <field name="code">/api/v1/qldt/login</field>
+            <field name="name">Thông tin đăng nhập</field>
+            <field name="params">
+                {
+
+                "login": "admin",
+                "password": "admin"
+
+                }
+            </field>
+            <field name="response">
+                {
+                "code": 200,
+                "status": "Thành công",
+                "message": "Đăng nhập thành công",
+                "data": {
+                "user_type": "internal",
+                "access_token":
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6ImRlbW8iLCJkZXZpY2VfaWQiOiJxbHZiIiwidHMiOjE3NjI1OTQ4NjIuMzIxMDE1fQ.GFBpV6XrkBmiTQGnzcl43b5T-n6I6DZPxe8xsj4AmZc"
+                }
+                }
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

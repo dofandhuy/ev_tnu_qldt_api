@@ -1,0 +1,65 @@
+<odoo>
+    <data>
+        <record id="api_years_config" model="config.api">
+            <field name="name">Đồng bộ Năm học</field>
+            <field name="code">/api/v1/qldt/years</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+
+        <record id="api_semester_config" model="config.api">
+            <field name="name">Đồng bộ Kỳ học</field>
+            <field name="code">/api/v1/qldt/semester</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+        <record id="api_student_config" model="config.api">
+            <field name="name">Đồng bộ học sinh</field>
+            <field name="code">/api/v1/qldt/student</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+        <record id="api_product_config" model="config.api">
+            <field name="name">Đồng bộ khoản thu</field>
+            <field name="code">/api/v1/qldt/product</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+        <record id="api_product_ttsv" model="config.api">
+            <field name="name">Đồng bộ thu tiền sinh viên</field>
+            <field name="code">/api/v1/qldt/student_payment</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+        <record id="api_dot_thu_config" model="config.api">
+            <field name="name">Đồng bộ đợt thu</field>
+            <field name="code">/api/v1/qldt/tuition_collection</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+
+        <record id="api_cap_bac_config" model="config.api">
+            <field name="name">Đồng bộ cấp bậc</field>
+            <field name="code">/api/v1/qldt/cap_bac</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+
+        <record id="api_hinh_thuc_dt_config" model="config.api">
+            <field name="name">Đồng bộ hình thức đào tạo</field>
+            <field name="code">/api/v1/qldt/hinh_thuc_dt</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+
+        <record id="api_chuong_trinh_dt_config" model="config.api">
+            <field name="name">Đồng bộ chương trình đào tạo</field>
+            <field name="code">/api/v1/qldt/chuong_trinh_dt</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+
+        <record id="api_nien_khoa_config" model="config.api">
+            <field name="name">Đồng bộ niên khóa</field>
+            <field name="code">/api/v1/qldt/nien_khoa</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+
+        <record id="api_nganh_hoc_config" model="config.api">
+            <field name="name">Đồng bộ ngành học</field>
+            <field name="code">/api/v1/qldt/nganh_hoc</field>
+            <field name="is_token_required" eval="False"/>
+        </record>
+    </data>
+</odoo>
